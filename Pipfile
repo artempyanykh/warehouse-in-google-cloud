@@ -8,6 +8,9 @@ name = "pypi"
 [packages]
 
 luigi = "*"
+pandas = "*"
+google-api-python-client = "*"
+google-cloud-dataflow = "*"
 
 
 [dev-packages]
