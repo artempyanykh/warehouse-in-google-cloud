@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import string
 import random
 from datetime import timedelta
@@ -100,13 +102,13 @@ def day_rents_generator(userbase, fleet):
     max_rents = len(fleet)
     rented_num = random.randint(min_rents, max_rents)
 
-    rented_cars = random.choices(fleet, k=rented_num)
-    renters = random.choices(userbase, k=rented_num)
+    rented_cars = random.sample(fleet, k=rented_num)
+    renters = random.sample(userbase, k=rented_num)
 
     return list(zip(renters, rented_cars))
 
 
-def fine_generator(day: date, user, car):
+def fine_generator(day, user, car):
     day_start = datetime.combine(day, datetime.min.time()) + timedelta(hours=6)
     day_end = datetime.combine(day, datetime.min.time()) + timedelta(hours=23)
     delta_in_mins = (day_end - day_start).seconds / 60
@@ -172,7 +174,7 @@ def generate_data(num_users, num_cars, start_date, num_days, mean_fines_num):
 
 if __name__ == '__main__':
     random.seed(0)
-    data = generate_data(100, 50, business_start_date, 30, 1)
+    data = generate_data(5, 3, business_start_date, 3, 1)
 
     users = pd.DataFrame.from_records(data['users'])
     cars = pd.DataFrame.from_records(data['cars'])

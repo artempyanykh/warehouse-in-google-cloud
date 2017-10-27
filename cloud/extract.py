@@ -3,16 +3,14 @@ from luigi.contrib.gcs import GCSTarget
 from cloud.util import root_dir
 from cloud.util import date_dir
 from cloud.util import abspath_join
-import abc
 
 
-class SampleDataLoad(luigi.Task, abc.ABC):
+class SampleDataLoad(luigi.Task):
     on = luigi.DateParameter()
 
     @property
-    @abc.abstractmethod
-    def sample_file_name(cls):
-        pass
+    def simple_file_name(self):
+        raise NotImplementedError()
 
     def run(self):
         input_filename = abspath_join(root_dir, 'sampledata/generated/%s' % self.sample_file_name)
