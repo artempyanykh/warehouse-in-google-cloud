@@ -98,7 +98,8 @@ def main(argv):
     print("Using credentials from file: %s" % os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     print("\n")
 
-    p = b.Pipeline(options=PipelineOptions())
+    opts = PipelineOptions()
+    p = b.Pipeline(options=opts)
 
     basedir = 'sampledata/generated'
 
@@ -158,7 +159,8 @@ def main(argv):
 
     combined = (rents_by_reg_no, fines_by_reg_no) | b.CoGroupByKey() | b.FlatMap(enrich_with_fine_data)
 
-    combined | 'write_result' >> b.io.WriteToText('test.csv')
+    header = ['']
+    combined | 'write_result' >> b.io.Write(CsvSink('gs://warehouse-in-gcs-store/glob/rich_fines/data.csv'))
     p.run()
 
 
