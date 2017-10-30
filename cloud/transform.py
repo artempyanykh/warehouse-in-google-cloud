@@ -7,6 +7,8 @@ from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam import pvalue
 from datetime import datetime
 
+from collections import OrderedDict
+
 import luigi
 from luigi.contrib.gcs import GCSTarget
 
@@ -51,18 +53,30 @@ class ProcessFines(luigi.Task):
 
         rich_fines = (rents_by_reg_no, fines_by_reg_no) | b.CoGroupByKey() | b.FlatMap(enrich_with_fine_data)
 
-        header = [
-            'fine_id', 'fine_amount', 'fine_registered_at',
-            'rent_id', 'rented_on',
-            'car_id', 'car_reg_number', 'car_make', 'car_model',
-            'user_id', 'user_name', 'user_passport_no', 'user_birth_date', 'user_driving_permit_since'
-        ]
+        header = list(self.final_schema.keys())
 
         (rich_fines
          | 'WriteRichFines' >> WriteWithSuccessFile(CsvSink('%s/%s' % (self.output().path, 'data.csv'), header)))
 
         run_result = p.run().wait_until_finish()
         return run_result
+
+    final_schema = OrderedDict([
+        ('fine_id', 'INTEGER'),
+        ('fine_amount', 'FLOAT'),
+        ('fine_registered_at', 'DATETIME'),
+        ('rent_id', 'INTEGER'),
+        ('rented_on', 'DATE'),
+        ('car_id', 'INTEGER'),
+        ('car_reg_number', 'STRING'),
+        ('car_make', 'STRING'),
+        ('car_model', 'STRING'),
+        ('user_id', 'INTEGER'),
+        ('user_name', 'STRING'),
+        ('user_passport_no', 'STRING'),
+        ('user_birth_date', 'DATE'),
+        ('user_driving_permit_since', 'DATE')
+    ])
 
 
 def parse_fine(raw_fine):

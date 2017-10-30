@@ -13,6 +13,8 @@ config = ConfigParser.ConfigParser()
 config.read(config_file)
 
 target_dir = config.get('CLOUD', 'target_dir')
+project_id = config.get('CLOUD', 'project_id')
+dataset_id = config.get('CLOUD', 'dataset_id')
 
 
 def date_dir(dat):
