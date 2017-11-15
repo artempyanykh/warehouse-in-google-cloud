@@ -174,16 +174,27 @@ def generate_data(num_users, num_cars, start_date, num_days, mean_fines_num):
 
 if __name__ == '__main__':
     random.seed(0)
-    data = generate_data(5, 3, business_start_date, 3, 1)
+
+    NUM_USERS = 5
+    NUM_CARS = 3
+    NUM_DAYS = 3
+    MEAN_FINES_NUM = 1
+
+    data = generate_data(NUM_USERS, NUM_CARS, business_start_date, NUM_DAYS, MEAN_FINES_NUM)
 
     users = pd.DataFrame.from_records(data['users'])
     cars = pd.DataFrame.from_records(data['cars'])
     rents = pd.DataFrame.from_records(data['rents'])
     fines = pd.DataFrame.from_records(data['fines'])
 
-    users.to_csv('generated/users.csv', header=True, index=False, columns=['id', 'name', 'passport_no', 'birth_date', 'driving_permit_since'])
+    users.to_csv('generated/users.csv', header=True, index=False,
+                 columns=['id', 'name', 'passport_no', 'birth_date', 'driving_permit_since'])
+
     cars.to_csv('generated/cars.csv', header=True, index=False, columns=['id', 'make', 'model', 'reg_number'])
+
     rents.to_csv('generated/rents.csv', header=True, index=False, columns=['id', 'user_id', 'car_id', 'rented_on'])
-    fines.to_csv('generated/fines.csv', header=True, index=False, columns=['id', 'car_reg_number', 'registered_at', 'fine_amount'])
+
+    fines.to_csv('generated/fines.csv', header=True, index=False,
+                 columns=['id', 'car_reg_number', 'registered_at', 'fine_amount'])
 
     print("Data has been generated.")
