@@ -6,6 +6,21 @@ import csv
 from StringIO import StringIO
 from apache_beam.io.filesystems import FileSystems
 import os
+from apache_beam.options.pipeline_options import PipelineOptions
+from cloud.util import beam_runner, beam_temp_location, project_id, root_dir, abspath_join
+
+
+def pipeline_options():
+    options = PipelineOptions.from_dictionary(
+        {
+            'runner': beam_runner,
+            'project': project_id,
+            'temp_location': beam_temp_location,
+            'setup_file': abspath_join(root_dir, 'setup.py')
+        }
+    )
+
+    return options
 
 
 class CsvSource(textio._TextSource):

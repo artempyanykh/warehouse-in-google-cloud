@@ -1,6 +1,6 @@
 from cloud import *
 from cloud.util import date_dir
-from cloud.beam_util import CsvSource, CsvSink, WriteWithSuccessFile
+from cloud.beam_util import CsvSource, CsvSink, WriteWithSuccessFile, pipeline_options
 
 import apache_beam as b
 from apache_beam.options.pipeline_options import PipelineOptions
@@ -28,7 +28,7 @@ class ProcessFines(luigi.Task):
         return GCSTarget('%s/%s' % (date_dir(self.on), 'rich_fines'))
 
     def run(self):
-        p = b.Pipeline(options=PipelineOptions([]))
+        p = b.Pipeline(options=pipeline_options())
         fines_path = self.input()['fines'].path
         rents_path = self.input()['rents'].path
         cars_path = self.input()['cars'].path

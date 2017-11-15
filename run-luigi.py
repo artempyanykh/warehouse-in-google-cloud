@@ -5,7 +5,7 @@ import sys
 
 import luigi.cmdline
 
-sys.path.append(os.path.dirname(__file__))
+# sys.path.append(os.path.dirname(__file__))
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.abspath(
     os.path.join(os.path.sep, os.path.dirname(os.path.abspath(__file__)), 'config/credentials.json'))

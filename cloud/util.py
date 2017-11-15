@@ -16,6 +16,9 @@ target_dir = config.get('CLOUD', 'target_dir')
 project_id = config.get('CLOUD', 'project_id')
 dataset_id = config.get('CLOUD', 'dataset_id')
 
+beam_runner = config.get('CLOUD', 'runner')
+beam_temp_location = config.get('CLOUD', 'temp_location')
+
 
 def date_dir(dat):
     return '/'.join([target_dir, dat.strftime('%Y-%m-%d')])
