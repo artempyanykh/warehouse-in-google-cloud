@@ -1,8 +1,8 @@
 import luigi
-from luigi.contrib.gcs import GCSTarget
-from cloud.util import root_dir
-from cloud.util import date_dir
-from cloud.util import abspath_join
+from luigi import LocalTarget
+from local.util import root_dir
+from local.util import date_dir
+from local.util import abspath_join
 
 
 class SampleDataLoad(luigi.Task):
@@ -16,11 +16,11 @@ class SampleDataLoad(luigi.Task):
         input_filename = abspath_join(root_dir, 'sampledata/generated/%s' % self.sample_file_name)
 
         with open(input_filename) as input_file:
-            with self.output().open('w') as cloud_file:
-                cloud_file.writelines(input_file.readlines())
+            with self.output().open('w') as local_file:
+                local_file.writelines(input_file.readlines())
 
     def output(self):
-        return GCSTarget('%s/%s' % (date_dir(self.on), self.sample_file_name))
+        return LocalTarget('%s/%s' % (date_dir(self.on), self.sample_file_name))
 
 
 class ExtractUsers(SampleDataLoad):
