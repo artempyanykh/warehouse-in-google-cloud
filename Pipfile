@@ -12,6 +12,9 @@ pandas = "*"
 google-api-python-client = "*"
 google-cloud-dataflow = "*"
 "psycopg2" = "*"
+ipdb = "*"
+ipython = "*"
+google-cloud-storage = "*"
 
 
 [dev-packages]
