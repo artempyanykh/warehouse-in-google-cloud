@@ -3,7 +3,6 @@ from cloud.util import date_dir
 from cloud.beam_util import CsvSource, CsvSink, WriteWithSuccessFile, pipeline_options
 
 import apache_beam as b
-from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam import pvalue
 from datetime import datetime
 

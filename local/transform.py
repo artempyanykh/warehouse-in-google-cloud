@@ -4,8 +4,6 @@ from local.util import date_dir
 import luigi
 from luigi import LocalTarget
 
-from collections import OrderedDict
-
 import pandas as pd
 
 
