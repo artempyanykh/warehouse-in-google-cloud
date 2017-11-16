@@ -8,6 +8,7 @@ from apache_beam.io.filesystems import FileSystems
 import os
 from apache_beam.options.pipeline_options import PipelineOptions
 from cloud.util import beam_runner, beam_temp_location, project_id, root_dir, abspath_join
+import apache_beam as b
 
 
 def pipeline_options():
@@ -123,3 +124,32 @@ class WriteWithSuccessFile(ptransform.PTransform):
             yield v
 
         yield window.TimestampedValue(success_filename, window.MAX_TIMESTAMP)
+
+
+class Join(ptransform.PTransform):
+    def __init__(self, *args, **kwargs):
+        self.left_on = kwargs['left_on']
+        self.right_on = kwargs['right_on']
+
+    def expand(self, pcolls):
+        left, right = pcolls
+
+        lable_l = ptransform.label_from_callable(self.left_on)
+        lable_r = ptransform.label_from_callable(self.right_on)
+
+        left_keyed = left | lable_l >> b.Map(self._key_by(self.left_on))
+        right_keyed = right | lable_r >> b.Map(self._key_by(self.right_on))
+
+        return (left_keyed, right_keyed) | b.CoGroupByKey() | b.FlatMap(self._flatten)
+
+    @classmethod
+    def _flatten(cls, key_l_r):
+        _, (ls, rs) = key_l_r
+
+        for l in ls:
+            for r in rs:
+                yield (l, r)
+
+    @classmethod
+    def _key_by(cls, fun):
+        return lambda x: (fun(x), x)

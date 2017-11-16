@@ -1,9 +1,8 @@
 from cloud import *
 from cloud.util import date_dir
-from cloud.beam_util import CsvSource, CsvSink, WriteWithSuccessFile, pipeline_options
+from cloud.beam_util import CsvSource, CsvSink, WriteWithSuccessFile, pipeline_options, Join
 
 import apache_beam as b
-from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam import pvalue
 from datetime import datetime
 
@@ -34,7 +33,7 @@ class ProcessFines(luigi.Task):
         cars_path = self.input()['cars'].path
         users_path = self.input()['users'].path
 
-        fines = p | 'ReadFines' >> b.io.Read(CsvSource(fines_path))
+        fines = p | 'ReadFines' >> b.io.Read(CsvSource(fines_path)) | b.Map(parse_fine)
         rents = p | 'ReadRents' >> b.io.Read(CsvSource(rents_path))
         cars = p | 'ReadCars' >> b.io.Read(CsvSource(cars_path))
         users = p | 'ReadUsers' >> b.io.Read(CsvSource(users_path))
@@ -48,10 +47,12 @@ class ProcessFines(luigi.Task):
             cars=pvalue.AsDict(cars_by_id)
         )
 
-        rents_by_reg_no = rich_rents | b.Map(lambda x: ((x['car_reg_number'], x['rented_on']), x))
-        fines_by_reg_no = fines | b.Map(parse_fine) | b.Map(lambda x: ((x['car_reg_number'], x['registered_on']), x))
-
-        rich_fines = (rents_by_reg_no, fines_by_reg_no) | b.CoGroupByKey() | b.FlatMap(enrich_with_fine_data)
+        rich_fines = (
+            (rich_rents, fines)
+            | Join(
+                left_on=lambda x: (x['car_reg_number'], x['rented_on']),
+                right_on=lambda x: (x['car_reg_number'], x['registered_on']))
+            | b.Map(enrich_with_fine_data))
 
         header = list(self.final_schema.keys())
 
@@ -107,13 +108,12 @@ def combine_with_cars_and_users(element, users, cars):
     return out
 
 
-def enrich_with_fine_data(key_rent_fines):
-    _, (rents, fines) = key_rent_fines
-    rent = rents[0]
+def enrich_with_fine_data(rent_fine):
+    rent, fine = rent_fine
 
-    for fine in fines:
-        out = dict(rent)
-        out['fine_id'] = fine['id']
-        out['fine_registered_at'] = fine['registered_at']
-        out['fine_amount'] = fine['fine_amount']
-        yield out
+    out = dict(rent)
+    out['fine_id'] = fine['id']
+    out['fine_registered_at'] = fine['registered_at']
+    out['fine_amount'] = fine['fine_amount']
+
+    return out
